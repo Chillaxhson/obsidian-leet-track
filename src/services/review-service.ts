@@ -45,6 +45,31 @@ export class ReviewService {
 		new Notice(`✅ ${file.basename} → ${display} (review in ${interval} days)`);
 	}
 
+	/**
+	 * Marks a problem as reviewed today without changing its mastery level.
+	 * Recalculates the next review date based on current mastery and increments review-count.
+	 */
+	async markReviewed(file: TFile): Promise<void> {
+		const settings = this.getSettings();
+		let currentMastery: Mastery = "red";
+
+		await this.app.fileManager.processFrontMatter(file, (fm) => {
+			currentMastery = fm.mastery ?? "red";
+
+			// Update review scheduling based on current mastery
+			fm["review-date"] = calculateNextReviewDate(currentMastery, settings.reviewIntervals);
+			fm["review-count"] = (fm["review-count"] || 0) + 1;
+
+			// Set solved-date if not already set
+			if (!fm["solved-date"]) {
+				fm["solved-date"] = todayString();
+			}
+		});
+
+		const interval = settings.reviewIntervals[currentMastery];
+		new Notice(`✅ ${file.basename} reviewed! Next review in ${interval} days.`);
+	}
+
 	// ─── Due Reviews ────────────────────────────────────────────────────
 
 	/**

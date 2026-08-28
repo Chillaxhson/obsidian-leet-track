@@ -1,6 +1,6 @@
 {
-  "id": "obsidian-leet-track",
-  "name": "Obsidian LeetTrack",
+  "id": "leet-track",
+  "name": "LeetTrack",
   "version": "1.0.0",
   "minAppVersion": "1.5.0",
   "description": "Create organized LeetCode notes with auto-fetched metadata, smart topic categorization, and spaced repetition review tracking.",

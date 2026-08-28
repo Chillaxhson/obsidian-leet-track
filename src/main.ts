@@ -101,6 +101,23 @@ export default class LeetTrackPlugin extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: "mark-reviewed",
+			name: "Mark current problem as reviewed",
+			checkCallback: (checking: boolean) => {
+				const file = this.app.workspace.getActiveFile();
+				if (!file) return false;
+
+				const leetFolder = this.problemService.getLeetCodeFolder();
+				if (!file.path.startsWith(leetFolder)) return false;
+
+				if (!checking) {
+					this.markCurrentAsReviewed(file);
+				}
+				return true;
+			},
+		});
+
 		// ── Settings Tab ─────────────────────────────────────────────────
 
 		this.addSettingTab(new LeetTrackSettingTab(this.app, this));
@@ -168,5 +185,12 @@ export default class LeetTrackPlugin extends Plugin {
 				await this.dashboardService.refreshDashboard();
 			}
 		).open();
+	}
+
+	private async markCurrentAsReviewed(file: TFile): Promise<void> {
+		await this.reviewService.markReviewed(file);
+		if (this.settings.autoRefreshHub) {
+			await this.dashboardService.refreshDashboard();
+		}
 	}
 }

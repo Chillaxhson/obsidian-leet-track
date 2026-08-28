@@ -159,9 +159,25 @@ export class DueReviewsModal extends Modal {
 
 			// Quick mastery buttons
 			const masteryBtns = itemEl.createDiv({ cls: "leet-track-due-item-mastery" });
+
+			// ✅ Mark reviewed (keep current mastery, bump review date)
+			const reviewedBtn = masteryBtns.createEl("button", {
+				text: "✅",
+				cls: "leet-track-due-mastery-btn leet-track-mastery-reviewed",
+				attr: { title: "Mark as reviewed (keep current mastery)" },
+			});
+			reviewedBtn.addEventListener("click", async () => {
+				const file = this.app.vault.getAbstractFileByPath(problem.path);
+				if (file instanceof TFile) {
+					await this.reviewService.markReviewed(file);
+					itemEl.remove();
+					await this.onRefreshDashboard();
+				}
+			});
+
 			for (const m of ["red", "yellow", "green"] as Mastery[]) {
 				const btn = masteryBtns.createEl("button", {
-					text: MASTERY_DISPLAY[m].charAt(0), // Just the emoji
+					text: [...MASTERY_DISPLAY[m]][0], // Just the emoji
 					cls: `leet-track-due-mastery-btn leet-track-mastery-${m}`,
 					attr: { title: `Set to ${MASTERY_DISPLAY[m]}` },
 				});

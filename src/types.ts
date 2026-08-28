@@ -25,7 +25,7 @@ export interface LeetCodeQuestion {
 }
 
 export interface LeetCodeSearchQuestion {
-	frontendQuestionId: string;
+	questionFrontendId: string;
 	title: string;
 	titleSlug: string;
 	difficulty: "Easy" | "Medium" | "Hard";

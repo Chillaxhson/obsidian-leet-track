@@ -48,7 +48,7 @@ query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int, $fi
   ) {
     totalNum
     data {
-      frontendQuestionId
+      questionFrontendId
       title
       titleSlug
       difficulty
@@ -104,7 +104,17 @@ export class LeetCodeClient {
 				const resp = await requestUrl({
 					url: this.endpoint,
 					method: "POST",
-					headers: { "Content-Type": "application/json" },
+					headers: {
+						"Content-Type": "application/json",
+						"Origin": this.endpoint.includes("leetcode.cn")
+							? "https://leetcode.cn"
+							: "https://leetcode.com",
+						"Referer": this.endpoint.includes("leetcode.cn")
+							? "https://leetcode.cn/"
+							: "https://leetcode.com/",
+						"User-Agent":
+							"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+					},
 					body: JSON.stringify({ query, variables }),
 				});
 
@@ -248,7 +258,7 @@ export class LeetCodeClient {
 			// Try exact ID match first
 			let matched: LeetCodeSearchQuestion | null = null;
 			if (/^\d+$/.test(trimmed)) {
-				matched = results.find(q => q.frontendQuestionId === trimmed) ?? null;
+				matched = results.find(q => q.questionFrontendId === trimmed) ?? null;
 			}
 
 			// Try exact title/slug match, then fall back to first result
@@ -274,7 +284,7 @@ export class LeetCodeClient {
 			} else {
 				// Convert SearchQuestion to Question shape
 				question = {
-					questionFrontendId: matched.frontendQuestionId,
+					questionFrontendId: matched.questionFrontendId,
 					title: matched.title,
 					titleSlug: matched.titleSlug,
 					difficulty: matched.difficulty,

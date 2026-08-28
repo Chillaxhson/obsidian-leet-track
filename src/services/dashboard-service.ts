@@ -13,7 +13,7 @@ export class DashboardService {
 		private getSettings: () => LeetTrackSettings,
 		private reviewService: ReviewService,
 		private getLeetCodeFolder: () => string
-	) {}
+	) { }
 
 	/**
 	 * Regenerates the entire hub dashboard from the current vault state.
@@ -274,7 +274,7 @@ Hard   ${bar(hard, total)} ${hard} (${((hard / total) * 100).toFixed(0)}%)
 			md += `### ${topic} (${items.length} problems)\n`;
 
 			for (const p of items) {
-				const icon = MASTERY_DISPLAY[p.mastery].charAt(0); // Just the emoji
+				const icon = [...MASTERY_DISPLAY[p.mastery]][0]; // Just the emoji
 				md += `- ${icon} [[${p.name}]]\n`;
 			}
 			md += "\n";
