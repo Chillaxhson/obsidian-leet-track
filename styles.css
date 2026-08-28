@@ -1,0 +1,268 @@
+/* ─── Obsidian LeetTrack — Plugin Styles ───────────────────────────────────── */
+
+/* ── Shared Modal ────────────────────────────────────────────────────────────*/
+
+.leet-track-modal {
+  padding: 10px;
+}
+
+.leet-track-modal-title {
+  margin-top: 0;
+  color: var(--text-accent);
+}
+
+.leet-track-modal-desc {
+  font-size: 0.9em;
+  color: var(--text-muted);
+  margin-bottom: 15px;
+}
+
+.leet-track-input {
+  width: 100%;
+  font-size: 1.05em;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.leet-track-info-msg {
+  margin: 10px 0;
+  font-size: 0.9em;
+  min-height: 20px;
+}
+
+.leet-track-btn-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.leet-track-submit-btn {
+  padding: 8px 18px;
+  font-weight: bold;
+}
+
+.leet-track-cancel-btn {
+  padding: 8px 18px;
+}
+
+/* ── Batch Import Modal ──────────────────────────────────────────────────────*/
+
+.leet-track-batch-textarea {
+  width: 100%;
+  font-size: 0.95em;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  resize: vertical;
+  font-family: var(--font-monospace);
+  min-height: 120px;
+}
+
+.leet-track-progress-container {
+  margin: 16px 0;
+}
+
+.leet-track-progress-text {
+  font-size: 0.9em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.leet-track-progress-bar-outer {
+  width: 100%;
+  height: 8px;
+  background: var(--background-modifier-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.leet-track-progress-bar-inner {
+  height: 100%;
+  width: 0%;
+  background: var(--interactive-accent);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.leet-track-batch-summary {
+  margin: 12px 0;
+}
+
+.leet-track-batch-summary-text {
+  font-weight: 600;
+  font-size: 1em;
+}
+
+.leet-track-batch-details {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.leet-track-batch-item {
+  padding: 4px 0;
+  font-size: 0.9em;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.leet-track-batch-item:last-child {
+  border-bottom: none;
+}
+
+.leet-track-batch-failed {
+  color: var(--text-error);
+}
+
+/* ── Mastery Modal ───────────────────────────────────────────────────────────*/
+
+.leet-track-mastery-filename {
+  font-weight: 600;
+  font-size: 1em;
+  color: var(--text-normal);
+}
+
+.leet-track-mastery-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.leet-track-mastery-btn {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid var(--background-modifier-border);
+  transition: all 0.15s ease;
+}
+
+.leet-track-mastery-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.leet-track-mastery-btn-label {
+  font-weight: 700;
+  font-size: 1.1em;
+  margin-bottom: 4px;
+}
+
+.leet-track-mastery-btn-desc {
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.leet-track-mastery-red {
+  border-color: #e74c3c;
+}
+
+.leet-track-mastery-red:hover {
+  background: rgba(231, 76, 60, 0.1);
+}
+
+.leet-track-mastery-yellow {
+  border-color: #f39c12;
+}
+
+.leet-track-mastery-yellow:hover {
+  background: rgba(243, 156, 18, 0.1);
+}
+
+.leet-track-mastery-green {
+  border-color: #27ae60;
+}
+
+.leet-track-mastery-green:hover {
+  background: rgba(39, 174, 96, 0.1);
+}
+
+/* ── Due Reviews Modal ───────────────────────────────────────────────────────*/
+
+.leet-track-due-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.leet-track-due-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  border-left: 3px solid transparent;
+}
+
+.leet-track-due-item.leet-track-mastery-red {
+  border-left-color: #e74c3c;
+}
+
+.leet-track-due-item.leet-track-mastery-yellow {
+  border-left-color: #f39c12;
+}
+
+.leet-track-due-item.leet-track-mastery-green {
+  border-left-color: #27ae60;
+}
+
+.leet-track-due-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.leet-track-due-item-name {
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+.leet-track-due-item-overdue {
+  font-size: 0.8em;
+  color: var(--text-muted);
+}
+
+.leet-track-due-item-btn {
+  padding: 4px 12px;
+  font-size: 0.85em;
+  border-radius: 4px;
+}
+
+.leet-track-due-item-mastery {
+  display: flex;
+  gap: 4px;
+}
+
+.leet-track-due-mastery-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--background-modifier-border);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.1s ease;
+}
+
+.leet-track-due-mastery-btn:hover {
+  transform: scale(1.2);
+}
+
+/* ── Settings: Custom Mappings ───────────────────────────────────────────────*/
+
+.leet-track-mappings {
+  margin-top: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 8px;
+}
