@@ -1,8 +1,8 @@
 import { App, normalizePath, TFile } from "obsidian";
-import type { LeetTrackSettings, DashboardProblem, Mastery } from "../types";
+import type { LeetTrackSettings, DashboardProblem } from "../types";
 import { ReviewService } from "./review-service";
 import { MASTERY_DISPLAY } from "../settings";
-import { isReviewDue, daysOverdue, calculateStreak, todayString, parseDate } from "../utils/date";
+import { isReviewDue, daysOverdue, calculateStreak, parseDate } from "../utils/date";
 
 /**
  * Generates and updates the Hub Dashboard markdown file.
@@ -76,7 +76,6 @@ export class DashboardService {
 	}
 
 	private generateDueForReview(problems: DashboardProblem[]): string {
-		const today = todayString();
 		const due = problems.filter(p => p.reviewDate && isReviewDue(p.reviewDate));
 
 		if (due.length === 0) {

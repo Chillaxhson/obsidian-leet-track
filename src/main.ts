@@ -1,10 +1,10 @@
 import { Plugin, TFile, Notice } from "obsidian";
-import type { LeetTrackSettings, Mastery } from "./types";
+import type { LeetTrackSettings } from "./types";
 import { LeetCodeClient } from "./api/leetcode";
 import { ProblemService } from "./services/problem-service";
 import { ReviewService } from "./services/review-service";
 import { DashboardService } from "./services/dashboard-service";
-import { LeetTrackSettingTab, DEFAULT_SETTINGS, migrateSettings } from "./settings";
+import { LeetTrackSettingTab, migrateSettings } from "./settings";
 import { InputModal } from "./modals/input-modal";
 import { BatchImportModal } from "./modals/batch-import-modal";
 import { UpdateMasteryModal, DueReviewsModal } from "./modals/review-modal";
@@ -112,7 +112,7 @@ export default class LeetTrackPlugin extends Plugin {
 				if (!file.path.startsWith(leetFolder)) return false;
 
 				if (!checking) {
-					this.markCurrentAsReviewed(file);
+					void this.markCurrentAsReviewed(file);
 				}
 				return true;
 			},
@@ -126,11 +126,12 @@ export default class LeetTrackPlugin extends Plugin {
 	// ─── Settings Lifecycle ─────────────────────────────────────────────
 
 	async loadSettings(): Promise<void> {
-		const loaded = (await this.loadData()) ?? {};
-		this.settings = migrateSettings(loaded);
+		const loaded = (await this.loadData()) as Record<string, unknown> | null;
+		this.settings = migrateSettings(loaded ?? {});
 
 		// Save migrated settings if version was bumped
-		if (!loaded.settingsVersion || loaded.settingsVersion < this.settings.settingsVersion) {
+		const loadedVersion = typeof loaded?.settingsVersion === "number" ? loaded.settingsVersion : 0;
+		if (!loadedVersion || loadedVersion < this.settings.settingsVersion) {
 			await this.saveSettings();
 		}
 	}
@@ -141,6 +142,7 @@ export default class LeetTrackPlugin extends Plugin {
 		// Recreate client if CN setting changed
 		this.client = new LeetCodeClient(this.settings.useLeetCodeCN);
 	}
+
 
 	// ─── Modal Openers ──────────────────────────────────────────────────
 

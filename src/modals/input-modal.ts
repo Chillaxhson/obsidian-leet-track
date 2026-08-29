@@ -1,6 +1,5 @@
-import { App, Modal, Setting, Notice } from "obsidian";
-import type { LeetTrackSettings, Mastery } from "../types";
-import { LeetCodeClient } from "../api/leetcode";
+import { App, Modal, Setting } from "obsidian";
+import type { Mastery } from "../types";
 import { MASTERY_DISPLAY } from "../settings";
 
 // ─── Single Problem Input Modal ─────────────────────────────────────────────
@@ -20,12 +19,12 @@ export class InputModal extends Modal {
 		contentEl.addClass("leet-track-modal");
 
 		contentEl.createEl("h2", {
-			text: "🧩 LeetTrack — Create Problem Note",
+			text: "🧩 LeetTrack — Create problem note",
 			cls: "leet-track-modal-title",
 		});
 
 		contentEl.createEl("p", {
-			text: "Enter a LeetCode URL, Problem ID (e.g. 42), or Title/Slug (e.g. trapping-rain-water, 3Sum):",
+			text: "Enter a LeetCode URL, problem ID (e.g. 42), or title/slug (e.g. trapping-rain-water, 3Sum):",
 			cls: "leet-track-modal-desc",
 		});
 
@@ -41,9 +40,9 @@ export class InputModal extends Modal {
 		// Mastery selector
 		new Setting(contentEl)
 			.setName("Initial mastery")
-			.setDesc("Auto: Easy → Green, Medium/Hard → Red")
+			.setDesc("Auto: easy → green, medium/hard → red")
 			.addDropdown(drop => {
-				drop.addOption("AUTO", "Auto (Easy=🟢 Green, Med/Hard=🔴 Red)");
+				drop.addOption("AUTO", "Auto (easy=🟢 green, med/hard=🔴 red)");
 				drop.addOption("red", MASTERY_DISPLAY.red + " (Needs Review)");
 				drop.addOption("yellow", MASTERY_DISPLAY.yellow + " (Stumbled on Code)");
 				drop.addOption("green", MASTERY_DISPLAY.green + " (Mastered / Solved Fast)");
@@ -59,7 +58,7 @@ export class InputModal extends Modal {
 		// Submit button
 		const btnContainer = contentEl.createDiv({ cls: "leet-track-btn-container" });
 		const submitBtn = btnContainer.createEl("button", {
-			text: "⚡ Create Note",
+			text: "⚡ Create note",
 			cls: "mod-cta leet-track-submit-btn",
 		});
 
@@ -67,14 +66,16 @@ export class InputModal extends Modal {
 			const val = inputEl.value.trim();
 			if (!val) {
 				infoEl.setText("⚠️ Please enter a problem URL, ID, or title.");
-				infoEl.style.color = "var(--text-error)";
+				infoEl.removeClass("leet-track-msg-accent");
+				infoEl.addClass("leet-track-msg-error");
 				return;
 			}
 
 			submitBtn.disabled = true;
 			submitBtn.setText("⏳ Fetching LeetCode data...");
 			infoEl.setText("Connecting to LeetCode API...");
-			infoEl.style.color = "var(--text-accent)";
+			infoEl.removeClass("leet-track-msg-error");
+			infoEl.addClass("leet-track-msg-accent");
 
 			try {
 				const mastery = this.masteryValue === "AUTO" ? null : this.masteryValue;
@@ -82,17 +83,21 @@ export class InputModal extends Modal {
 				this.close();
 			} catch (err) {
 				submitBtn.disabled = false;
-				submitBtn.setText("⚡ Create Note");
+				submitBtn.setText("⚡ Create note");
 				infoEl.setText(`❌ Error: ${(err as Error).message}`);
-				infoEl.style.color = "var(--text-error)";
+				infoEl.removeClass("leet-track-msg-accent");
+				infoEl.addClass("leet-track-msg-error");
 			}
 		};
 
-		submitBtn.addEventListener("click", handleCreate);
+		submitBtn.addEventListener("click", () => {
+			void handleCreate();
+		});
+
 		inputEl.addEventListener("keydown", (e) => {
 			if (e.key === "Enter") {
 				e.preventDefault();
-				handleCreate();
+				void handleCreate();
 			}
 		});
 	}
@@ -101,3 +106,4 @@ export class InputModal extends Modal {
 		this.contentEl.empty();
 	}
 }
+

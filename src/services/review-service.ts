@@ -25,9 +25,7 @@ export class ReviewService {
 	async updateMastery(file: TFile, newMastery: Mastery): Promise<void> {
 		const settings = this.getSettings();
 
-		await this.app.fileManager.processFrontMatter(file, (fm) => {
-			const oldMastery = fm.mastery;
-
+		await this.app.fileManager.processFrontMatter(file, (fm: Record<string, unknown>) => {
 			fm.mastery = newMastery;
 
 			// Set solved-date on first mastery update (indicates actual solving)
@@ -37,7 +35,8 @@ export class ReviewService {
 
 			// Update review scheduling
 			fm["review-date"] = calculateNextReviewDate(newMastery, settings.reviewIntervals);
-			fm["review-count"] = (fm["review-count"] || 0) + 1;
+			const count = typeof fm["review-count"] === "number" ? fm["review-count"] : 0;
+			fm["review-count"] = count + 1;
 		});
 
 		const display = MASTERY_DISPLAY[newMastery];
@@ -53,12 +52,16 @@ export class ReviewService {
 		const settings = this.getSettings();
 		let currentMastery: Mastery = "red";
 
-		await this.app.fileManager.processFrontMatter(file, (fm) => {
-			currentMastery = fm.mastery ?? "red";
+		await this.app.fileManager.processFrontMatter(file, (fm: Record<string, unknown>) => {
+			const m = fm.mastery;
+			if (m === "red" || m === "yellow" || m === "green") {
+				currentMastery = m;
+			}
 
 			// Update review scheduling based on current mastery
 			fm["review-date"] = calculateNextReviewDate(currentMastery, settings.reviewIntervals);
-			fm["review-count"] = (fm["review-count"] || 0) + 1;
+			const count = typeof fm["review-count"] === "number" ? fm["review-count"] : 0;
+			fm["review-count"] = count + 1;
 
 			// Set solved-date if not already set
 			if (!fm["solved-date"]) {

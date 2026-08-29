@@ -23,22 +23,22 @@ export function htmlToMarkdown(html: string): string {
 	md = md.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
 
 	// Convert <pre> blocks (preserve content, wrap in code fences)
-	md = md.replace(/<pre[^>]*>([\s\S]*?)<\/pre>/gi, (_, content) => {
+	md = md.replace(/<pre[^>]*>([\s\S]*?)<\/pre>/gi, (_: string, content: string): string => {
 		// Strip inner tags but keep text
 		const text = stripTags(content).trim();
 		return `\n\`\`\`\n${text}\n\`\`\`\n`;
 	});
 
 	// Convert <code> to inline code
-	md = md.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, (_, content) => {
+	md = md.replace(/<code[^>]*>([\s\S]*?)<\/code>/gi, (_: string, content: string): string => {
 		const text = stripTags(content).trim();
 		return `\`${text}\``;
 	});
 
 	// Convert headings
-	md = md.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, c) => `\n# ${stripTags(c).trim()}\n`);
-	md = md.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, c) => `\n## ${stripTags(c).trim()}\n`);
-	md = md.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, c) => `\n### ${stripTags(c).trim()}\n`);
+	md = md.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_: string, c: string): string => `\n# ${stripTags(c).trim()}\n`);
+	md = md.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_: string, c: string): string => `\n## ${stripTags(c).trim()}\n`);
+	md = md.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_: string, c: string): string => `\n### ${stripTags(c).trim()}\n`);
 
 	// Convert <strong> / <b> to bold
 	md = md.replace(/<(?:strong|b)[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi, "**$1**");
@@ -51,7 +51,7 @@ export function htmlToMarkdown(html: string): string {
 	md = md.replace(/<sub[^>]*>([\s\S]*?)<\/sub>/gi, "~$1~");
 
 	// Convert <a href="...">text</a> to [text](url)
-	md = md.replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_, url, text) => {
+	md = md.replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, (_: string, url: string, text: string): string => {
 		return `[${stripTags(text).trim()}](${url})`;
 	});
 
@@ -60,17 +60,17 @@ export function htmlToMarkdown(html: string): string {
 	md = md.replace(/<img[^>]*src="([^"]*)"[^>]*\/?>/gi, "![]($1)");
 
 	// Convert ordered lists
-	md = md.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, content) => {
+	md = md.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_: string, content: string): string => {
 		let counter = 1;
-		const items = content.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, item: string) => {
+		const items = content.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, item: string): string => {
 			return `${counter++}. ${stripTags(item).trim()}\n`;
 		});
 		return `\n${stripTags(items, true)}\n`;
 	});
 
 	// Convert unordered lists
-	md = md.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, content) => {
-		const items = content.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, item: string) => {
+	md = md.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_: string, content: string): string => {
+		const items = content.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, item: string): string => {
 			return `- ${stripTags(item).trim()}\n`;
 		});
 		return `\n${stripTags(items, true)}\n`;
@@ -80,7 +80,7 @@ export function htmlToMarkdown(html: string): string {
 	md = md.replace(/<br\s*\/?>/gi, "\n");
 
 	// Convert <p> to double newline
-	md = md.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_, content) => {
+	md = md.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_: string, content: string): string => {
 		return `\n${content.trim()}\n`;
 	});
 
@@ -142,8 +142,9 @@ function decodeEntities(text: string): string {
 	}
 
 	// Handle numeric entities: &#123; and &#x1A;
-	result = result.replace(/&#(\d+);/g, (_, num) => String.fromCharCode(parseInt(num, 10)));
-	result = result.replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+	result = result.replace(/&#(\d+);/g, (_: string, num: string): string => String.fromCharCode(parseInt(num, 10)));
+	result = result.replace(/&#x([0-9a-fA-F]+);/g, (_: string, hex: string): string => String.fromCharCode(parseInt(hex, 16)));
 
 	return result;
 }
+

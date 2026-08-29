@@ -1,5 +1,5 @@
 import { App, Modal, TFile } from "obsidian";
-import type { Mastery, DashboardProblem } from "../types";
+import type { Mastery } from "../types";
 import { MASTERY_DISPLAY } from "../settings";
 import { ReviewService } from "../services/review-service";
 import { daysOverdue } from "../utils/date";
@@ -33,7 +33,7 @@ export class UpdateMasteryModal extends Modal {
 		contentEl.addClass("leet-track-modal", "leet-track-mastery-modal");
 
 		contentEl.createEl("h2", {
-			text: "🎯 Update Problem Mastery",
+			text: "🎯 Update problem mastery",
 			cls: "leet-track-modal-title",
 		});
 
@@ -61,13 +61,15 @@ export class UpdateMasteryModal extends Modal {
 		description: string
 	): void {
 		const btn = container.createDiv({ cls: `leet-track-mastery-btn leet-track-mastery-${mastery}` });
-		btn.createEl("span", { text: label, cls: "leet-track-mastery-btn-label" });
-		btn.createEl("span", { text: description, cls: "leet-track-mastery-btn-desc" });
+		btn.createSpan({ text: label, cls: "leet-track-mastery-btn-label" });
+		btn.createSpan({ text: description, cls: "leet-track-mastery-btn-desc" });
 
-		btn.addEventListener("click", async () => {
-			await this.reviewService.updateMastery(this.file, mastery);
-			await this.onComplete();
-			this.close();
+		btn.addEventListener("click", () => {
+			void (async () => {
+				await this.reviewService.updateMastery(this.file, mastery);
+				await this.onComplete();
+				this.close();
+			})();
 		});
 	}
 
@@ -102,7 +104,7 @@ export class DueReviewsModal extends Modal {
 		contentEl.addClass("leet-track-modal", "leet-track-due-modal");
 
 		contentEl.createEl("h2", {
-			text: "📅 Problems Due for Review",
+			text: "📅 Problems due for review",
 			cls: "leet-track-modal-title",
 		});
 
@@ -134,11 +136,11 @@ export class DueReviewsModal extends Modal {
 
 			// Problem info
 			const infoEl = itemEl.createDiv({ cls: "leet-track-due-item-info" });
-			infoEl.createEl("span", {
+			infoEl.createSpan({
 				text: `${MASTERY_DISPLAY[problem.mastery]} #${problem.num} — ${problem.name}`,
 				cls: "leet-track-due-item-name",
 			});
-			infoEl.createEl("span", {
+			infoEl.createSpan({
 				text: `${overdue} day${overdue !== 1 ? "s" : ""} overdue`,
 				cls: "leet-track-due-item-overdue",
 			});
@@ -152,7 +154,7 @@ export class DueReviewsModal extends Modal {
 				const file = this.app.vault.getAbstractFileByPath(problem.path);
 				if (file instanceof TFile) {
 					const leaf = this.app.workspace.getLeaf(false);
-					leaf.openFile(file);
+					void leaf.openFile(file);
 					this.close();
 				}
 			});
@@ -166,13 +168,15 @@ export class DueReviewsModal extends Modal {
 				cls: "leet-track-due-mastery-btn leet-track-mastery-reviewed",
 				attr: { title: "Mark as reviewed (keep current mastery)" },
 			});
-			reviewedBtn.addEventListener("click", async () => {
-				const file = this.app.vault.getAbstractFileByPath(problem.path);
-				if (file instanceof TFile) {
-					await this.reviewService.markReviewed(file);
-					itemEl.remove();
-					await this.onRefreshDashboard();
-				}
+			reviewedBtn.addEventListener("click", () => {
+				void (async () => {
+					const file = this.app.vault.getAbstractFileByPath(problem.path);
+					if (file instanceof TFile) {
+						await this.reviewService.markReviewed(file);
+						itemEl.remove();
+						await this.onRefreshDashboard();
+					}
+				})();
 			});
 
 			for (const m of ["red", "yellow", "green"] as Mastery[]) {
@@ -181,15 +185,17 @@ export class DueReviewsModal extends Modal {
 					cls: `leet-track-due-mastery-btn leet-track-mastery-${m}`,
 					attr: { title: `Set to ${MASTERY_DISPLAY[m]}` },
 				});
-				btn.addEventListener("click", async () => {
-					const file = this.app.vault.getAbstractFileByPath(problem.path);
-					if (file instanceof TFile) {
-						await this.reviewService.updateMastery(file, m);
-						// Remove the item from the list
-						itemEl.remove();
-						// Refresh dashboard
-						await this.onRefreshDashboard();
-					}
+				btn.addEventListener("click", () => {
+					void (async () => {
+						const file = this.app.vault.getAbstractFileByPath(problem.path);
+						if (file instanceof TFile) {
+							await this.reviewService.updateMastery(file, m);
+							// Remove the item from the list
+							itemEl.remove();
+							// Refresh dashboard
+							await this.onRefreshDashboard();
+						}
+					})();
 				});
 			}
 		}
@@ -199,3 +205,4 @@ export class DueReviewsModal extends Modal {
 		this.contentEl.empty();
 	}
 }
+

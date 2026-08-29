@@ -5,7 +5,6 @@ import type {
 	LeetCodeGraphQLResponse,
 	QuestionDataResponse,
 	QuestionListResponse,
-	LeetCodeApiError as LeetCodeApiErrorType,
 	ProblemData,
 } from "../types";
 import { LeetCodeApiError } from "../types";
@@ -173,7 +172,7 @@ export class LeetCodeClient {
 
 	private async delay(attempt: number): Promise<void> {
 		const ms = BASE_DELAY_MS * Math.pow(2, attempt);
-		await new Promise(resolve => setTimeout(resolve, ms));
+		await new Promise(resolve => window.setTimeout(resolve, ms));
 	}
 
 	// ─── Public Methods ───────────────────────────────────────────────────
@@ -240,7 +239,7 @@ export class LeetCodeClient {
 			titleSlug = trimmed.toLowerCase();
 		}
 
-		let question: LeetCodeQuestion | null = null;
+		let question: LeetCodeQuestion;
 
 		if (titleSlug) {
 			question = await this.fetchBySlug(titleSlug, settings.includeDescription);

@@ -30,7 +30,7 @@ export class BatchImportModal extends Modal {
 		contentEl.addClass("leet-track-modal", "leet-track-batch-modal");
 
 		contentEl.createEl("h2", {
-			text: "📦 LeetTrack — Batch Import",
+			text: "📦 LeetTrack — Batch import",
 			cls: "leet-track-modal-title",
 		});
 
@@ -51,7 +51,7 @@ export class BatchImportModal extends Modal {
 
 		// Progress area (hidden initially)
 		const progressContainer = contentEl.createDiv({ cls: "leet-track-progress-container" });
-		progressContainer.style.display = "none";
+		progressContainer.hide();
 
 		const progressText = progressContainer.createDiv({ cls: "leet-track-progress-text" });
 		const progressBarOuter = progressContainer.createDiv({ cls: "leet-track-progress-bar-outer" });
@@ -59,12 +59,12 @@ export class BatchImportModal extends Modal {
 
 		// Results area (hidden initially)
 		const resultsContainer = contentEl.createDiv({ cls: "leet-track-results-container" });
-		resultsContainer.style.display = "none";
+		resultsContainer.hide();
 
 		// Buttons
 		const btnContainer = contentEl.createDiv({ cls: "leet-track-btn-container" });
 		const importBtn = btnContainer.createEl("button", {
-			text: "⚡ Import All",
+			text: "⚡ Import all",
 			cls: "mod-cta leet-track-submit-btn",
 		});
 		const closeBtn = btnContainer.createEl("button", {
@@ -74,44 +74,46 @@ export class BatchImportModal extends Modal {
 
 		closeBtn.addEventListener("click", () => this.close());
 
-		importBtn.addEventListener("click", async () => {
-			const raw = textareaEl.value.trim();
-			if (!raw) {
-				new Notice("⚠️ Please enter at least one problem.");
-				return;
-			}
+		importBtn.addEventListener("click", () => {
+			void (async () => {
+				const raw = textareaEl.value.trim();
+				if (!raw) {
+					new Notice("⚠️ Please enter at least one problem.");
+					return;
+				}
 
-			const lines = raw
-				.split("\n")
-				.map(l => l.trim())
-				.filter(l => l.length > 0);
+				const lines = raw
+					.split("\n")
+					.map(l => l.trim())
+					.filter(l => l.length > 0);
 
-			if (lines.length === 0) {
-				new Notice("⚠️ No valid inputs found.");
-				return;
-			}
+				if (lines.length === 0) {
+					new Notice("⚠️ No valid inputs found.");
+					return;
+				}
 
-			// Switch to progress mode
-			importBtn.disabled = true;
-			importBtn.setText("⏳ Importing...");
-			textareaEl.disabled = true;
-			progressContainer.style.display = "block";
+				// Switch to progress mode
+				importBtn.disabled = true;
+				importBtn.setText("⏳ Importing...");
+				textareaEl.disabled = true;
+				progressContainer.show();
 
-			const summary = await this.runBatchImport(
-				lines,
-				progressText,
-				progressBarInner,
-				lines.length
-			);
+				const summary = await this.runBatchImport(
+					lines,
+					progressText,
+					progressBarInner,
+					lines.length
+				);
 
-			// Show results
-			progressContainer.style.display = "none";
-			resultsContainer.style.display = "block";
-			this.renderResults(resultsContainer, summary);
+				// Show results
+				progressContainer.hide();
+				resultsContainer.show();
+				this.renderResults(resultsContainer, summary);
 
-			importBtn.style.display = "none";
-			closeBtn.setText("Done");
-			closeBtn.addClass("mod-cta");
+				importBtn.hide();
+				closeBtn.setText("Done");
+				closeBtn.addClass("mod-cta");
+			})();
 		});
 	}
 
@@ -125,11 +127,10 @@ export class BatchImportModal extends Modal {
 		let imported = 0;
 		let skipped = 0;
 		let failed = 0;
-
 		for (let i = 0; i < inputs.length; i++) {
 			const input = inputs[i]!;
 			progressText.setText(`Processing ${i + 1}/${total}: ${input}`);
-			progressBar.style.width = `${((i + 1) / total) * 100}%`;
+			progressBar.setCssStyles({ width: `${((i + 1) / total) * 100}%` });
 
 			try {
 				const problemData = await this.client.resolve(input, this.settings);
@@ -170,7 +171,7 @@ export class BatchImportModal extends Modal {
 
 			// Polite delay between requests
 			if (i < inputs.length - 1) {
-				await new Promise(resolve => setTimeout(resolve, POLITE_DELAY_MS));
+				await new Promise(resolve => window.setTimeout(resolve, POLITE_DELAY_MS));
 			}
 		}
 

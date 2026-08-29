@@ -1,5 +1,5 @@
 import { PluginSettingTab, Setting, App, Plugin } from "obsidian";
-import type { LeetTrackSettings, Mastery, TagSlug, TopicName } from "./types";
+import type { LeetTrackSettings, Mastery } from "./types";
 import { DEFAULT_REVIEW_INTERVALS } from "./constants";
 
 // ─── Default Settings ───────────────────────────────────────────────────────
@@ -64,7 +64,7 @@ export const DEFAULT_SETTINGS: LeetTrackSettings = {
  * pre-LeetTrack "LeetCode Helper" version.
  */
 export function migrateSettings(loaded: Record<string, unknown>): LeetTrackSettings {
-	const settings = { ...DEFAULT_SETTINGS };
+	const settings: LeetTrackSettings = { ...DEFAULT_SETTINGS };
 
 	// No settingsVersion = legacy "LeetCode Helper" plugin
 	if (!loaded.settingsVersion) {
@@ -99,7 +99,7 @@ export function migrateSettings(loaded: Record<string, unknown>): LeetTrackSetti
 		...DEFAULT_SETTINGS,
 		...loaded,
 		settingsVersion: 1,
-	} as LeetTrackSettings;
+	};
 }
 
 /**
@@ -126,41 +126,36 @@ export const MASTERY_LABELS: Record<Mastery, string> = {
 	green: "🟢 Green (Mastered / Solved Fast)",
 };
 
+export interface LeetTrackPluginHost {
+	settings: LeetTrackSettings;
+	saveSettings(): Promise<void>;
+}
+
 // ─── Settings Tab ───────────────────────────────────────────────────────────
 
 export class LeetTrackSettingTab extends PluginSettingTab {
-	private plugin: Plugin & {
-		settings: LeetTrackSettings;
-		saveSettings: () => Promise<void>;
-	};
+	private pluginHost: LeetTrackPluginHost;
 
-	constructor(
-		app: App,
-		plugin: Plugin & { settings: LeetTrackSettings; saveSettings: () => Promise<void> }
-	) {
+	constructor(app: App, plugin: Plugin & LeetTrackPluginHost) {
 		super(app, plugin);
-		this.plugin = plugin;
+		this.pluginHost = plugin;
 	}
 
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl("h2", { text: "Obsidian LeetTrack Settings" });
-
 		// ── General ──────────────────────────────────────────────────────
-
-		containerEl.createEl("h3", { text: "General" });
 
 		new Setting(containerEl)
 			.setName("LeetCode root folder")
 			.setDesc("Relative path to your LeetCode notes directory (e.g. LeetCode or 200 - Projects/200.2 - LeetCode)")
 			.addText(text => text
 				.setPlaceholder("LeetCode")
-				.setValue(this.plugin.settings.leetcodeFolder)
+				.setValue(this.pluginHost.settings.leetcodeFolder)
 				.onChange(async (value) => {
-					this.plugin.settings.leetcodeFolder = value;
-					await this.plugin.saveSettings();
+					this.pluginHost.settings.leetcodeFolder = value;
+					await this.pluginHost.saveSettings();
 				}));
 
 		new Setting(containerEl)
@@ -168,129 +163,134 @@ export class LeetTrackSettingTab extends PluginSettingTab {
 			.setDesc("Name of the hub dashboard markdown file")
 			.addText(text => text
 				.setPlaceholder("00 - LeetCode Hub.md")
-				.setValue(this.plugin.settings.dashboardFileName)
+				.setValue(this.pluginHost.settings.dashboardFileName)
 				.onChange(async (value) => {
-					this.plugin.settings.dashboardFileName = value;
-					await this.plugin.saveSettings();
+					this.pluginHost.settings.dashboardFileName = value;
+					await this.pluginHost.saveSettings();
 				}));
 
 		new Setting(containerEl)
 			.setName("Auto-update hub dashboard")
 			.setDesc("Automatically refresh the dashboard when a new note is created or mastery is updated")
 			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.autoRefreshHub)
+				.setValue(this.pluginHost.settings.autoRefreshHub)
 				.onChange(async (value) => {
-					this.plugin.settings.autoRefreshHub = value;
-					await this.plugin.saveSettings();
+					this.pluginHost.settings.autoRefreshHub = value;
+					await this.pluginHost.saveSettings();
 				}));
 
 		new Setting(containerEl)
 			.setName("Include problem description")
 			.setDesc("Fetch and include the problem description (converted to Markdown) in the note template")
 			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.includeDescription)
+				.setValue(this.pluginHost.settings.includeDescription)
 				.onChange(async (value) => {
-					this.plugin.settings.includeDescription = value;
-					await this.plugin.saveSettings();
+					this.pluginHost.settings.includeDescription = value;
+					await this.pluginHost.saveSettings();
 				}));
 
 		// ── LeetCode Region ─────────────────────────────────────────────
 
-		containerEl.createEl("h3", { text: "LeetCode Region" });
+		new Setting(containerEl)
+			.setName("LeetCode region")
+			.setHeading();
 
 		new Setting(containerEl)
 			.setName("Use LeetCode CN")
 			.setDesc("Switch API endpoint and generated links to leetcode.cn (for users in China)")
 			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.useLeetCodeCN)
+				.setValue(this.pluginHost.settings.useLeetCodeCN)
 				.onChange(async (value) => {
-					this.plugin.settings.useLeetCodeCN = value;
-					await this.plugin.saveSettings();
+					this.pluginHost.settings.useLeetCodeCN = value;
+					await this.pluginHost.saveSettings();
 				}));
 
 		// ── Default Mastery ─────────────────────────────────────────────
 
-		containerEl.createEl("h3", { text: "Default Mastery" });
+		new Setting(containerEl)
+			.setName("Default mastery")
+			.setHeading();
 
 		new Setting(containerEl)
-			.setName("Default mastery for Easy problems")
-			.setDesc("Initial mastery level assigned when creating a note for an Easy problem")
+			.setName("Default mastery for easy problems")
+			.setDesc("Initial mastery level assigned when creating a note for an easy problem")
 			.addDropdown(drop => drop
 				.addOption("green", MASTERY_LABELS.green)
 				.addOption("yellow", MASTERY_LABELS.yellow)
 				.addOption("red", MASTERY_LABELS.red)
-				.setValue(this.plugin.settings.defaultMasteryEasy)
+				.setValue(this.pluginHost.settings.defaultMasteryEasy)
 				.onChange(async (value) => {
-					this.plugin.settings.defaultMasteryEasy = value as Mastery;
-					await this.plugin.saveSettings();
+					this.pluginHost.settings.defaultMasteryEasy = value as Mastery;
+					await this.pluginHost.saveSettings();
 				}));
 
 		new Setting(containerEl)
-			.setName("Default mastery for Medium & Hard problems")
-			.setDesc("Initial mastery level assigned when creating a note for Medium or Hard problems")
+			.setName("Default mastery for medium & hard problems")
+			.setDesc("Initial mastery level assigned when creating a note for medium or hard problems")
 			.addDropdown(drop => drop
 				.addOption("red", MASTERY_LABELS.red)
 				.addOption("yellow", MASTERY_LABELS.yellow)
 				.addOption("green", MASTERY_LABELS.green)
-				.setValue(this.plugin.settings.defaultMasteryMediumHard)
+				.setValue(this.pluginHost.settings.defaultMasteryMediumHard)
 				.onChange(async (value) => {
-					this.plugin.settings.defaultMasteryMediumHard = value as Mastery;
-					await this.plugin.saveSettings();
+					this.pluginHost.settings.defaultMasteryMediumHard = value as Mastery;
+					await this.pluginHost.saveSettings();
 				}));
 
 		// ── Review Intervals ────────────────────────────────────────────
 
-		containerEl.createEl("h3", { text: "Review Intervals" });
+		new Setting(containerEl)
+			.setName("Review intervals")
+			.setHeading();
 
 		new Setting(containerEl)
 			.setName("Red interval (days)")
-			.setDesc("Days until next review when mastery is Red")
+			.setDesc("Days until next review when mastery is red")
 			.addText(text => text
 				.setPlaceholder("1")
-				.setValue(String(this.plugin.settings.reviewIntervals.red))
+				.setValue(String(this.pluginHost.settings.reviewIntervals.red))
 				.onChange(async (value) => {
 					const num = parseInt(value, 10);
 					if (!isNaN(num) && num > 0) {
-						this.plugin.settings.reviewIntervals.red = num;
-						await this.plugin.saveSettings();
+						this.pluginHost.settings.reviewIntervals.red = num;
+						await this.pluginHost.saveSettings();
 					}
 				}));
 
 		new Setting(containerEl)
 			.setName("Yellow interval (days)")
-			.setDesc("Days until next review when mastery is Yellow")
+			.setDesc("Days until next review when mastery is yellow")
 			.addText(text => text
 				.setPlaceholder("3")
-				.setValue(String(this.plugin.settings.reviewIntervals.yellow))
+				.setValue(String(this.pluginHost.settings.reviewIntervals.yellow))
 				.onChange(async (value) => {
 					const num = parseInt(value, 10);
 					if (!isNaN(num) && num > 0) {
-						this.plugin.settings.reviewIntervals.yellow = num;
-						await this.plugin.saveSettings();
+						this.pluginHost.settings.reviewIntervals.yellow = num;
+						await this.pluginHost.saveSettings();
 					}
 				}));
 
 		new Setting(containerEl)
 			.setName("Green interval (days)")
-			.setDesc("Days until next review when mastery is Green")
+			.setDesc("Days until next review when mastery is green")
 			.addText(text => text
 				.setPlaceholder("7")
-				.setValue(String(this.plugin.settings.reviewIntervals.green))
+				.setValue(String(this.pluginHost.settings.reviewIntervals.green))
 				.onChange(async (value) => {
 					const num = parseInt(value, 10);
 					if (!isNaN(num) && num > 0) {
-						this.plugin.settings.reviewIntervals.green = num;
-						await this.plugin.saveSettings();
+						this.pluginHost.settings.reviewIntervals.green = num;
+						await this.pluginHost.saveSettings();
 					}
 				}));
 
 		// ── Custom Topic Mappings ───────────────────────────────────────
 
-		containerEl.createEl("h3", { text: "Custom Topic Mappings" });
-		containerEl.createEl("p", {
-			text: "Override which topic folder a LeetCode tag maps to. These take priority over the built-in defaults.",
-			cls: "setting-item-description",
-		});
+		new Setting(containerEl)
+			.setName("Custom topic mappings")
+			.setDesc("Override which topic folder a LeetCode tag maps to. These take priority over the built-in defaults.")
+			.setHeading();
 
 		const mappingsContainer = containerEl.createDiv({ cls: "leet-track-mappings" });
 		this.renderMappings(mappingsContainer);
@@ -299,7 +299,7 @@ export class LeetTrackSettingTab extends PluginSettingTab {
 	private renderMappings(container: HTMLElement): void {
 		container.empty();
 
-		const mappings = this.plugin.settings.customTopicMappings;
+		const mappings = this.pluginHost.settings.customTopicMappings;
 
 		// Existing mappings
 		for (const [tag, folder] of Object.entries(mappings)) {
@@ -310,8 +310,8 @@ export class LeetTrackSettingTab extends PluginSettingTab {
 					.setButtonText("Remove")
 					.setWarning()
 					.onClick(async () => {
-						delete this.plugin.settings.customTopicMappings[tag];
-						await this.plugin.saveSettings();
+						delete this.pluginHost.settings.customTopicMappings[tag];
+						await this.pluginHost.saveSettings();
 						this.renderMappings(container);
 					}));
 		}
@@ -320,7 +320,7 @@ export class LeetTrackSettingTab extends PluginSettingTab {
 		let newTag = "";
 		let newFolder = "";
 
-		const addSetting = new Setting(container)
+		new Setting(container)
 			.setName("Add new mapping")
 			.addText(text => text
 				.setPlaceholder("tag-slug (e.g. greedy)")
@@ -333,10 +333,11 @@ export class LeetTrackSettingTab extends PluginSettingTab {
 				.setCta()
 				.onClick(async () => {
 					if (newTag && newFolder) {
-						this.plugin.settings.customTopicMappings[newTag] = newFolder;
-						await this.plugin.saveSettings();
+						this.pluginHost.settings.customTopicMappings[newTag] = newFolder;
+						await this.pluginHost.saveSettings();
 						this.renderMappings(container);
 					}
 				}));
 	}
 }
+

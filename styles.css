@@ -31,6 +31,15 @@
   min-height: 20px;
 }
 
+.leet-track-msg-error {
+  color: var(--text-error);
+}
+
+.leet-track-msg-accent {
+  color: var(--text-accent);
+}
+
+
 .leet-track-btn-container {
   display: flex;
   justify-content: flex-end;
