@@ -306,14 +306,19 @@ export class LeetTrackSettingTab extends PluginSettingTab {
 			new Setting(container)
 				.setName(tag)
 				.setDesc(`→ ${folder}`)
-				.addButton(btn => btn
-					.setButtonText("Remove")
-					.setWarning()
-					.onClick(async () => {
+				.addButton(btn => {
+					btn.setButtonText("Remove");
+					if ("setDestructive" in btn && typeof (btn as { setDestructive?: unknown }).setDestructive === "function") {
+						(btn as unknown as { setDestructive: () => void }).setDestructive();
+					} else {
+						btn.setWarning();
+					}
+					btn.onClick(async () => {
 						delete this.pluginHost.settings.customTopicMappings[tag];
 						await this.pluginHost.saveSettings();
 						this.renderMappings(container);
-					}));
+					});
+				});
 		}
 
 		// Add new mapping
