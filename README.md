@@ -1,5 +1,8 @@
 # Obsidian LeetTrack
 
+> [!NOTE]
+> **Disclaimer:** This plugin is **vibe coded** — built rapidly with AI assistance and creative energy rather than traditional software engineering rigor. It works well for my personal workflow, but expect rough edges. Use at your own risk, and feel free to open issues or contribute fixes!
+
 Create organized LeetCode problem notes with auto-fetched metadata, smart topic categorization, and spaced repetition review tracking — all inside your Obsidian vault.
 
 ![Obsidian](https://img.shields.io/badge/Obsidian-%23483699.svg?logo=obsidian&logoColor=white)
@@ -64,6 +67,8 @@ Import Problem → Study / Solve → Set Mastery
 
 **Review scheduling** is automatic — when you update mastery, the next review date is calculated and stored in the note's frontmatter. The **"Show Problems Due for Review"** command lists all overdue problems.
 
+You can also **mark a problem as reviewed** without changing its mastery level — this bumps the review date forward based on the current mastery and increments the review count. Available as a command or via the ✅ button in the Due Reviews modal.
+
 ### Batch Import
 
 Import multiple problems at once. Paste a list of IDs, URLs, or slugs — one per line — and the plugin creates all notes with progress tracking and a summary showing imported/skipped/failed counts.
@@ -119,6 +124,7 @@ All commands are accessible via the Command Palette (`Cmd/Ctrl + P`):
 | **Refresh hub dashboard** | Regenerate the dashboard from current vault state |
 | **Update problem mastery** | Set mastery level (Red/Yellow/Green) for the active note |
 | **Show problems due for review** | List all problems past their review date |
+| **Mark current problem as reviewed** | Bump the review date without changing mastery |
 
 The ribbon icon (code icon in the left sidebar) opens the **Create new problem note** modal.
 
